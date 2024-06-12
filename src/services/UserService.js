@@ -95,9 +95,9 @@ const getAllUser = (limit, page, sort, filter) => {
         try {
             const totalUser = await User.countDocuments()
             if (filter) {
-                const objectFilter = {}
-                objectFilter[filter[1]] = filter[0]
                 const lable = filter[0]
+                //lọc số user được tìm từ đầu(limit), bỏ qua số lượng user đã được lọc và bắt đầu tìm từ user thứ page * limit
+                // tìm kiếm theo trường filter[0] với giá trị filter[1]
                 const getAllUserFilter = await User.find({ isDelete: false, [lable]: { '$regex': filter[1] } }).limit(limit).skip(page * limit)
                 resolve({
                     status: "OK",
@@ -111,6 +111,9 @@ const getAllUser = (limit, page, sort, filter) => {
             if (sort) {
                 const objectSort = {}
                 objectSort[sort[1]] = sort[0]
+                //sort sắp xếp theo trường sort[1] theo thứ tự sort[0]
+                console.log(objectSort)
+                //lọc số user được tìm từ đầu(limit), bỏ qua số lượng user đã được lọc và bắt đầu tìm từ user thứ page * limit
                 const getAllUserSort = await User.find({ isDelete: false }).limit(limit).skip(page * limit).sort(objectSort)
                 resolve({
                     status: "OK",
@@ -121,6 +124,7 @@ const getAllUser = (limit, page, sort, filter) => {
                     totalPage: Math.ceil(totalUser / limit)
                 })
             }
+            //lọc số user được tìm từ đầu(limit), bỏ qua số lượng user đã được lọc và bắt đầu tìm từ user thứ page * limit
             const getAllUser = await User.find({ isDelete: false }).limit(limit).skip(page * limit)
             resolve({
                 status: "OK",

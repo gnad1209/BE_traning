@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
 dotenv.config()
 
+//middleware kiểm tra admin
 const authMiddleware = (req, res, next) => {
     const token = req.headers.token.split(' ')[1]
     console.log(token)
@@ -24,6 +25,7 @@ const authMiddleware = (req, res, next) => {
         }
     })
 }
+//middleware kiểm tra admin và user
 
 const authUserMiddleware = (req, res, next) => {
     const token = req.headers.token.split(' ')[1]

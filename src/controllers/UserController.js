@@ -8,6 +8,7 @@ dotenv.config()
 const signUp = async (req, res) => {
     try {
         const { email, password, confirmPassword } = req.body
+        //sử dụng biểu thức chính quy kiêm tra email
         const reg = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
         const isCheckMail = reg.test(email)
 
@@ -45,6 +46,7 @@ const signUp = async (req, res) => {
 const signIn = async (req, res) => {
     try {
         const { email, password } = req.body
+        //sử dụng biểu thức chính quy kiêm tra email
         const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
         const ischeckMail = reg.test(email)
         if (!email || !password) {
@@ -106,9 +108,7 @@ const getAllUser = async (req, res) => {
         const response = await userService.getAllUser(Number(limit) || 8, Number(page) || 0, sort, filter)
         return res.status(200).json(response)
     } catch (e) {
-        return res.status(400).json({
-            message: e
-        })
+        return res.status(400).json({ message: e })
     }
 }
 
@@ -138,11 +138,45 @@ const detailUser = async (req, res) => {
     }
 }
 
+const refreshToken = async (req, res) => {
+    try {
+        let token = req.headers.token.split(' ')[1]
+        if (!token) {
+            return res.status(200).json({
+                status: 'ERR',
+                message: 'The token is required'
+            })
+        }
+        const response = await jwtService.refreshToken(token)
+        return res.status(200).json(response)
+    } catch (e) {
+        return res.status(404).json({
+            message: e
+        })
+    }
+}
+
+const logoutUser = async (req,res) =>{
+    try{
+        res.clearCookie('refresh_token')
+        return res.status(200).json({
+            status:'OK',
+            message:'Logout success'
+        })
+    }catch(e){
+        return res.status(404).json({
+            message:e
+        })
+    }
+}
+
 module.exports = {
     signUp,
     signIn,
     updateUser,
     getAllUser,
     deleteUser,
-    detailUser
+    detailUser,
+    refreshToken,
+    logoutUser
 }
