@@ -13,7 +13,7 @@ cloudinary.config({
 
 const signUp = (data) => {
     return new Promise(async (resolve, reject) => {
-        const { email, password, confirmPassword } = data
+        const { email, password } = data
         try {
             const checkUser = await User.findOne({
                 email: email
@@ -25,21 +25,19 @@ const signUp = (data) => {
                 })
             }
             const name = email.split('@')[0]
-            console.log(name)
             const hash = bcrypt.hashSync(password, 10);
-            const createUser = await User.create({
+            const signUpUser = await User.create({
                 email,
                 name,
                 password: hash,
             })
-            if (createUser) {
+            if (signUpUser) {
                 resolve({
                     status: 'OK',
                     message: 'SUCCESS',
                     data: createUser
                 })
             }
-            resolve({})
         } catch (e) {
             reject(e)
         }
@@ -230,6 +228,40 @@ const detailUser = async (id) => {
     })
 }
 
+const createUser = (data) => {
+    return new Promise(async (resolve, reject) => {
+        const { email, password,isAdmin } = data
+        try {
+            const checkUser = await User.findOne({
+                email: email
+            })
+            if (checkUser !== null) {
+                resolve({
+                    status: "ERR",
+                    message: "the email is already"
+                })
+            }
+            const name = email.split('@')[0]
+            const hash = bcrypt.hashSync(password, 10);
+            const createUser = await User.create({
+                email,
+                name,
+                isAdmin,
+                password: hash,
+                })
+            if (createUser) {
+                resolve({
+                    status: 'OK',
+                    message: 'SUCCESS',
+                    data: createUser
+                })
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     signUp,
     signIn,
@@ -237,5 +269,6 @@ module.exports = {
     updateUser,
     uploadImage,
     deleteUser,
-    detailUser
+    detailUser,
+    createUser
 }

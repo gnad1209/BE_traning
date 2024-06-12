@@ -170,6 +170,47 @@ const logoutUser = async (req,res) =>{
     }
 }
 
+const createUser = async (req,res) =>{
+    try{
+        const token = req.headers.token.split(' ')[1]
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN);
+        const { email, password, confirmPassword, isAdmin } = req.body
+        //sử dụng biểu thức chính quy kiêm tra email
+        const reg = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+        const isCheckMail = reg.test(email)
+        req.body.createBy = decoded.id
+        //kiểm tra có các trường cần nhập  chưa
+        if (!email || !password || !confirmPassword ) {
+            return res.status(400).json({
+                status: "ERR",
+                message: "nhập đủ tên hoặc mật khẩu",
+            })
+
+        }
+        //kiểm tra email hợp lệ
+        else if (!isCheckMail) {
+            return res.status(400).json({
+                status: "ERR",
+                message: "nhập sai email"
+            })
+        }
+        //kiểm tra xác nhận mật khẩu có trùng không 
+        else if (password !== confirmPassword) {
+            return res.status(400).json({
+                status: "ERR",
+                message: "mật khẩu không trùng khớp"
+            })
+        }
+        //gọi signup ở service và truyền vào req.body
+        const response = await userService.createUser(req.body)
+        return res.status(200).json(response)
+    }catch(e){
+        return res.status(404).json({
+            message:e
+        })
+    }
+}
+
 module.exports = {
     signUp,
     signIn,
@@ -178,5 +219,6 @@ module.exports = {
     deleteUser,
     detailUser,
     refreshToken,
-    logoutUser
+    logoutUser,
+    createUser
 }
