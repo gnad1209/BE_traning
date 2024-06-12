@@ -37,6 +37,8 @@ const authUserMiddleware = (req, res, next) => {
             })
         }
         if (user?.isAdmin || user?.id === userId) {
+            req.token = token;
+            req.user = user
             next()
         }
         else {

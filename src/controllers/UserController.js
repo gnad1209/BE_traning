@@ -1,13 +1,16 @@
 const userService = require('../services/UserService')
 const jwtService = require('../services/JwtService');
+const jwt = require('jsonwebtoken');
 const User = require('../models/UserModel');
-
+const dotenv = require("dotenv")
+dotenv.config()
 
 const signUp = async (req, res) => {
     try {
         const { email, password, confirmPassword } = req.body
         const reg = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
         const isCheckMail = reg.test(email)
+
         //kiểm tra có các trường cần nhập  chưa
         if (!email || !password || !confirmPassword) {
             return res.status(400).json({
@@ -56,7 +59,6 @@ const signIn = async (req, res) => {
             })
         }
         const response = await userService.signIn(req.body)
-        console.log(response)
         const { refresh_token, ...newResponse } = response
         res.cookie('refresh_token', refresh_token, {
             httpOnly: true,
@@ -77,6 +79,8 @@ const updateUser = async (req, res) => {
         const userId = req.params.id
         const data = Object.assign({}, req.body);
         const file = req.file
+        const token = req.headers.token.split(' ')[1]
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN);
         //kiểm tra id
         if (!userId) {
             return res.status(400).json({
@@ -86,6 +90,7 @@ const updateUser = async (req, res) => {
         }
         const upload = await userService.uploadImage(file)
         data.avatar = upload.url
+        data.updateBy = decoded.id
         const response = await userService.updateUser(userId, data)
         return res.status(200).json(response)
     } catch (e) {

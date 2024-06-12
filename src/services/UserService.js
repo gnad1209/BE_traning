@@ -136,7 +136,7 @@ const getAllUser = (limit, page, sort, filter) => {
     })
 }
 
-const updateUser = async (id, data) => {
+const updateUser = async (id, data, token) => {
     return new Promise(async (resolve, reject) => {
         try {
             const checkUser = User.findOne({
