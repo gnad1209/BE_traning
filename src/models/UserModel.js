@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 const shortid = require('shortid');
 const slug = require('mongoose-slug-generator');
+const moment = require('moment')
+const timestampPlugin = require('../middleware/setTimeMiddleware')
 mongoose.plugin(slug);
 
 const userSchema = new mongoose.Schema({
@@ -12,11 +14,11 @@ const userSchema = new mongoose.Schema({
     avatar: { type: String },
     isAdmin: { type: Boolean, default: false },
     isDelete: { type: Boolean, default: false },
+    updateBy: { type: String },
     shortid: { type: String, unique: true, default: shortid.generate },
     slug: { type: String, slug: ['name', 'shortid'] },
-}, {
-    timestamps: true,
-})
+}, { timestamps: true })
+userSchema.plugin(timestampPlugin)
 const User = mongoose.model('User', userSchema)
 
 module.exports = User

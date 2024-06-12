@@ -87,7 +87,7 @@ const updateUser = async (req, res) => {
         const upload = await userService.uploadImage(file)
         data.avatar = upload.url
         const response = await userService.updateUser(userId, data)
-        return res.status(200).json(data.avatar)
+        return res.status(200).json(response)
     } catch (e) {
         return res.status(400).json({
             messgae: e
@@ -116,10 +116,28 @@ const deleteUser = async (req, res) => {
         return res.status(400).json({ message: e })
     }
 }
+
+const detailUser = async (req, res) => {
+    try {
+        const userId = req.params.id
+        if (!userId) {
+            return res.status(400).json({
+                status: "ERR",
+                message: "user is not defined"
+            })
+        }
+        const response = await userService.detailUser(userId)
+        return res.status(200).json(response)
+    } catch (e) {
+        return res.status(400).json({ message: e })
+    }
+}
+
 module.exports = {
     signUp,
     signIn,
     updateUser,
     getAllUser,
-    deleteUser
+    deleteUser,
+    detailUser
 }

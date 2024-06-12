@@ -13,7 +13,7 @@ cloudinary.config({
 
 const signUp = (data) => {
     return new Promise(async (resolve, reject) => {
-        const { email, password, confirmPassword, birthDate } = data
+        const { email, password, confirmPassword } = data
         try {
             const checkUser = await User.findOne({
                 email: email
@@ -24,11 +24,13 @@ const signUp = (data) => {
                     message: "the email is already"
                 })
             }
+            const name = email.split('@')[0]
+            console.log(name)
             const hash = bcrypt.hashSync(password, 10);
             const createUser = await User.create({
                 email,
+                name,
                 password: hash,
-                birthDate
             })
             if (createUser) {
                 resolve({
@@ -202,11 +204,34 @@ const deleteUser = async (id) => {
         }
     })
 }
+
+const detailUser = async (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const checkUser = await User.findOne({ _id: id })
+            if (!checkUser) {
+                resolve({
+                    status: "fail",
+                    message: "user is not defined"
+                })
+            }
+            resolve({
+                status: "200",
+                message: "success!!",
+                data: checkUser
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     signUp,
     signIn,
     getAllUser,
     updateUser,
     uploadImage,
-    deleteUser
+    deleteUser,
+    detailUser
 }

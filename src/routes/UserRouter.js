@@ -4,12 +4,12 @@ const userController = require('../controllers/UserController')
 const multer = require('multer')
 const storage = multer.memoryStorage();
 const upload = multer({ storage })
-const { authMiddleware } = require('../middleware/authMiddleware')
+const { authMiddleware, authUserMiddleware } = require('../middleware/authMiddleware')
 
 router.post('/sign-up', userController.signUp)
 router.post('/sign-in', userController.signIn)
 router.get('/getAll', authMiddleware, userController.getAllUser)
-router.delete('/delete/:id', userController.deleteUser)
-router.put('/update/:id', upload.single('avatar'), userController.updateUser)
-// router.post('/sign-up', userController.signUp)
+router.delete('/delete/:id', authMiddleware, userController.deleteUser)
+router.put('/update/:id', authUserMiddleware, upload.single('avatar'), userController.updateUser)
+router.get('/detail/:id', authUserMiddleware, userController.detailUser)
 module.exports = router
