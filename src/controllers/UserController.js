@@ -78,6 +78,7 @@ const signIn = async (req, res) => {
 const updateUser = async (req, res) => {
     try {
         const userId = req.params.id
+        //sao chép thuộc tính và giá trị vào đối tượng mới không ảnh hưởng tới req.body
         const data = Object.assign({}, req.body);
         const file = req.file
         const token = req.headers.token.split(' ')[1]

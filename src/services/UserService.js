@@ -17,6 +17,7 @@ cloudinary.config({
 
 const signUp = (data) => {
     return new Promise(async (resolve, reject) => {
+        // Destructure dữ liệu từ tham số đầu vào
         const { email, password, isAdmin = 0 } = data
         try {
             const checkUser = await User.findOne({
@@ -28,8 +29,8 @@ const signUp = (data) => {
                     message: "the email is already"
                 })
             }
+            // Tìm quyền hạn tương ứng với isAdmin
             const permission = await Permission.findOne({ level: isAdmin });
-            console.log(permission)
             if (!permission) {
                 return res.status(400).json({ message: 'Invalid permission level' });
             }
@@ -38,7 +39,7 @@ const signUp = (data) => {
             const signUpUser = await User.create({
                 email,
                 name,
-                createBy: email,
+                createBy: email,// Gán người tạo là chính người dùng này
                 password: hash,
                 permission: permission._id
             })
@@ -152,6 +153,7 @@ const getAllUser = (limit, page, sort, filter) => {
 const updateUser = async (id, data, token) => {
     return new Promise(async (resolve, reject) => {
         try {
+            //Kiểm tra user
             const checkUser = User.findOne({
                 _id: id
             })
@@ -161,6 +163,7 @@ const updateUser = async (id, data, token) => {
                     message: "user is not defined"
                 })
             }
+            //update user
             const updateUser = await User.findByIdAndUpdate(id, data, { new: true })
             resolve({
                 status: "ok",
@@ -176,12 +179,14 @@ const updateUser = async (id, data, token) => {
 const uploadImage = (file) => {
     return new Promise(async (resolve, reject) => {
         try {
+            //Kiểm tra file được tải lên
             if (!file) {
                 return resolve({
                     status: "404",
                     message: "no image file provided"
                 })
             }
+            //tích hợp tải file lên cloudinary
             cloudinary.uploader.upload_stream({ folder: 'lifetek' }, (error, result) => {
                 if (error) {
                     return resolve({
@@ -260,13 +265,15 @@ const createUser = (data) => {
             if (!department) {
                 return res.status(400).json({ message: 'Invalid department' });
             }
+            //gán name cho bản ghi
             const name = email.split('@')[0]
+            //mã hóa password
             const hash = bcrypt.hashSync(password, 10);
             const createUser = await User.create({
                 email,
                 name,
                 isAdmin,
-                createBy,
+                createBy, //là người đang đăng nhập 
                 password: hash,
                 permission: permission._id,
                 department: department._id,
