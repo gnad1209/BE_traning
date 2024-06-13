@@ -7,7 +7,7 @@ const bodyParser = require("body-parser");
 const cors = require('cors')
 const cookieParser = require("cookie-parser")
 dotenv.config()
-
+const Permission = require('./models/PermissionModel');
 const app = express()
 const port = process.env.PORT || 3000
 

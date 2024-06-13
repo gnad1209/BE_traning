@@ -1,6 +1,9 @@
 const User = require('../models/UserModel')
 const bcrypt = require("bcrypt")
 const { genneralAccessToken, genneralRefreshToken } = require('../services/JwtService')
+const Permission = require('../models/PermissionModel')
+const Department = require('../models/DepartmentModel')
+
 const dotenv = require("dotenv")
 dotenv.config()
 const cloudinary = require('cloudinary').v2;
@@ -11,9 +14,10 @@ cloudinary.config({
     api_secret: process.env.API_SECRET
 });
 
+
 const signUp = (data) => {
     return new Promise(async (resolve, reject) => {
-        const { email, password } = data
+        const { email, password, isAdmin = 0 } = data
         try {
             const checkUser = await User.findOne({
                 email: email
@@ -24,12 +28,19 @@ const signUp = (data) => {
                     message: "the email is already"
                 })
             }
+            const permission = await Permission.findOne({ level: isAdmin });
+            console.log(permission)
+            if (!permission) {
+                return res.status(400).json({ message: 'Invalid permission level' });
+            }
             const name = email.split('@')[0]
             const hash = bcrypt.hashSync(password, 10);
             const signUpUser = await User.create({
                 email,
                 name,
+                createBy: email,
                 password: hash,
+                permission: permission._id
             })
             if (signUpUser) {
                 resolve({
@@ -230,7 +241,7 @@ const detailUser = async (id) => {
 
 const createUser = (data) => {
     return new Promise(async (resolve, reject) => {
-        const { email, password,isAdmin } = data
+        const { email, password, isAdmin, createBy, departmentId } = data
         try {
             const checkUser = await User.findOne({
                 email: email
@@ -241,14 +252,25 @@ const createUser = (data) => {
                     message: "the email is already"
                 })
             }
+            const permission = await Permission.findOne({ level: isAdmin });
+            if (!permission) {
+                return res.status(400).json({ message: 'Invalid permission level' });
+            }
+            const department = await Department.findById(departmentId);
+            if (!department) {
+                return res.status(400).json({ message: 'Invalid department' });
+            }
             const name = email.split('@')[0]
             const hash = bcrypt.hashSync(password, 10);
             const createUser = await User.create({
                 email,
                 name,
                 isAdmin,
+                createBy,
                 password: hash,
-                })
+                permission: permission._id,
+                department: department._id,
+            })
             if (createUser) {
                 resolve({
                     status: 'OK',

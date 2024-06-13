@@ -26,6 +26,7 @@ const timestampPlugin = (schema) => {
         this.updatedAt = moment().format('YYYY-MM-DD HH:mm:ss');
         next();
     });
+    //khi update giữ nguyên giá trị createAt
     const updateMiddleware = function (next) {
         if (this._update.createdAt) {
             delete this._update.createdAt;

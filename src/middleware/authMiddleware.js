@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const Permission = require('../models/PermissionModel');
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -31,16 +32,15 @@ const authUserMiddleware = (req, res, next) => {
     const token = req.headers.token.split(' ')[1]
     const userId = req.params.id
     jwt.verify(token, process.env.ACCESS_TOKEN, function (err, user) {
-        console.log(err)
         if (err) {
             return res.status(400).json({
                 status: 400,
                 message: "the authencaiton"
             })
         }
-        if (user?.isAdmin || user?.id === userId) {
-            req.token = token;
-            req.user = user
+        if (user?.isAdmin == 1 || user?.id === userId) {
+            req.user = userId
+            // req.user = user
             next()
         }
         else {
@@ -54,5 +54,5 @@ const authUserMiddleware = (req, res, next) => {
 
 module.exports = {
     authMiddleware,
-    authUserMiddleware
+    authUserMiddleware,
 }

@@ -1,7 +1,7 @@
 const userService = require('../services/UserService')
-const jwtService = require('../services/JwtService');
-const jwt = require('jsonwebtoken');
-const User = require('../models/UserModel');
+const jwtService = require('../services/JwtService')
+const jwt = require('jsonwebtoken')
+const User = require('../models/UserModel')
 const dotenv = require("dotenv")
 dotenv.config()
 
@@ -11,7 +11,6 @@ const signUp = async (req, res) => {
         //sử dụng biểu thức chính quy kiêm tra email
         const reg = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
         const isCheckMail = reg.test(email)
-
         //kiểm tra có các trường cần nhập  chưa
         if (!email || !password || !confirmPassword) {
             return res.status(400).json({
@@ -83,6 +82,7 @@ const updateUser = async (req, res) => {
         const file = req.file
         const token = req.headers.token.split(' ')[1]
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN);
+        const updateBy = await User.findOne({ _id: decoded.id })
         //kiểm tra id
         if (!userId) {
             return res.status(400).json({
@@ -92,7 +92,7 @@ const updateUser = async (req, res) => {
         }
         const upload = await userService.uploadImage(file)
         data.avatar = upload.url
-        data.updateBy = decoded.id
+        data.updateBy = updateBy.email
         const response = await userService.updateUser(userId, data)
         return res.status(200).json(response)
     } catch (e) {
@@ -156,31 +156,34 @@ const refreshToken = async (req, res) => {
     }
 }
 
-const logoutUser = async (req,res) =>{
-    try{
+const logoutUser = async (req, res) => {
+    try {
+        //xóa refresh token khỏi cookie
         res.clearCookie('refresh_token')
         return res.status(200).json({
-            status:'OK',
-            message:'Logout success'
+            status: 'OK',
+            message: 'Logout success'
         })
-    }catch(e){
+    } catch (e) {
         return res.status(404).json({
-            message:e
+            message: e
         })
     }
 }
 
-const createUser = async (req,res) =>{
-    try{
+const createUser = async (req, res) => {
+    try {
         const token = req.headers.token.split(' ')[1]
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN);
+        const createBy = await User.findOne({ _id: decoded.id })
+        req.body.createBy = createBy.email
         const { email, password, confirmPassword, isAdmin } = req.body
         //sử dụng biểu thức chính quy kiêm tra email
         const reg = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
         const isCheckMail = reg.test(email)
-        req.body.createBy = decoded.id
+
         //kiểm tra có các trường cần nhập  chưa
-        if (!email || !password || !confirmPassword ) {
+        if (!email || !password || !confirmPassword) {
             return res.status(400).json({
                 status: "ERR",
                 message: "nhập đủ tên hoặc mật khẩu",
@@ -204,9 +207,9 @@ const createUser = async (req,res) =>{
         //gọi signup ở service và truyền vào req.body
         const response = await userService.createUser(req.body)
         return res.status(200).json(response)
-    }catch(e){
+    } catch (e) {
         return res.status(404).json({
-            message:e
+            message: e
         })
     }
 }
